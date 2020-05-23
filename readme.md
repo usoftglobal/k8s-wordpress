@@ -16,8 +16,17 @@
   # 查看 PV，正常情况下状态为 Available
   kubectl get pv
 
-  # 部署 Wordpress
+  # 部署 Wordpress，pod 状态为 running 有一个过程稍微等一会
   kubectl apply -k ./deployments
+
+  # 查看 pod 节点是否正常运行，正常情况 wordpress 开头的 pod 状态为 Running
+  kubectl get pods
+
+  # 查看 pod 详细信息，如果长时间没有 Running 状态则可能出问题了，需要查看 Events 日志排查
+  kubectl describe pod {上一步的podname}
+
+  # 查看 NodePort 类型的端口，结合 Master 的主机 IP 就可以远程访问了
+  kubectl get services
 ```
 
 ### 怎么清除（重装）？
