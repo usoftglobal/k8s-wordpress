@@ -1,0 +1,8 @@
+# MySQL 配置信息
+secretGenerator:
+- name: mysql-pass
+  literals:
+  - password=root
+resources:
+  - mysql-deployment.yaml
+  - wordpress-deployment.yaml

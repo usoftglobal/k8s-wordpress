@@ -1,0 +1,70 @@
+# Wordpress Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress
+  labels:
+    app: wordpress
+spec:
+  ports:
+    - port: 80
+  selector:
+    app: wordpress
+    tier: frontend
+  type: LoadBalancer
+---
+# Wordpress PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wp-pv-claim
+  labels:
+    app: wordpress
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+# Wordpress Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress
+  labels:
+    app: wordpress
+spec:
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: frontend
+  strategy:             # 策略，默认 RollingUpdate，表示更新 Pod 的时候会以滚动更新的方式逐个更新 Pod
+    type: Recreate      # Recreate 表示重建，更新 Pod 的时候会把所有正在运行的 Pod 杀掉，然后重建新的 Pod
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: frontend
+    spec:
+      containers:
+      - image: wordpress:4.8-apache             # 该镜像包含了 Wordpress、PHP、Apache
+        name: wordpress
+        env:                                    # 应用程序需要的相关配置
+        - name: WORDPRESS_DB_HOST               # WORDPRESS_DB_HOST 对应的值从 MySQL 的 Service 获取
+          value: wordpress-mysql
+        - name: WORDPRESS_DB_PASSWORD           # 数据库密码和 MySQL 获取的方式一样
+          valueFrom:
+            secretKeyRef:
+              name: mysql-pass
+              key: password
+        ports:
+        - containerPort: 80
+          name: wordpress
+        volumeMounts:                            # 将持久化数据卷挂载到 /var/www/html 目录
+        - name: wordpress-persistent-storage
+          mountPath: /var/www/html
+      volumes:                                   # 该部署关联的上面创建的 wp-pv-claim 持久化数据卷
+      - name: wordpress-persistent-storage
+        persistentVolumeClaim:
+          claimName: wp-pv-claim

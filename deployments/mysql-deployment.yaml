@@ -1,0 +1,68 @@
+# MySQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress-mysql       # Service 名称
+  labels:
+    app: wordpress            # 同属于 wordpress 下面的服务
+spec:
+  ports:
+    - port: 3306
+  selector:                   # 可以使用相关标签选择到该 Service
+    app: wordpress
+    tier: mysql
+  clusterIP: None
+---
+# MySQL PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+  labels:
+    app: wordpress
+spec:
+  accessModes:                # 权限设置
+    - ReadWriteOnce
+  resources:                  # 资源设置
+    requests:
+      storage: 5Gi            # 2048GB
+---
+#  MySQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress-mysql
+  labels:
+    app: wordpress
+spec:
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: mysql
+    spec:
+      containers:
+      - image: mysql:5.6
+        name: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:                        # 密码从 kustomization.yaml 获取
+            secretKeyRef:
+              name: mysql-pass
+              key: password
+        ports:
+        - containerPort: 3306               # 该容器输出端口
+          name: mysql
+        volumeMounts:
+        - name: mysql-persistent-storage    # 容器将持久化数据卷挂载在 /var/lib/mysql
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-persistent-storage      # 该部署关联的持久化数据卷为上面创建的 mysql-pv-claim 卷
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim
