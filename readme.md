@@ -6,11 +6,8 @@
   git clone https://github.com/usoftglobal/k8s-wordpress.git
 
   cd k8s-wordpress
-```
 
-### 创建一个本地数据卷
-
-```
+  # 创建一个本地数据卷
   kubectl apply -f local-volumes.yaml
 
   # 查看 PV，正常情况下状态为 Available
