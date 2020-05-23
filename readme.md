@@ -45,3 +45,7 @@ A：这表示节点还没准备好，通过 `kubectl get nodes` 如果发现 STA
 Q：查看 pod 详情里面提示有 `node-role.kubernetes.io/master` 相关污点
 
 A：Master 主机默认不允许部署 pod，可以通过 `kubectl taint nodes --all node-role.kubernetes.io/master-` 去除
+
+### 参考文档
+
+https://kubernetes.io/zh/docs/tutorials/stateful-application/mysql-wordpress-persistent-volume/
