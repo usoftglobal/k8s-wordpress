@@ -25,7 +25,7 @@ spec:
     - ReadWriteOnce
   resources:                  # 资源设置
     requests:
-      storage: 5Gi            # 2048GB
+      storage: 5Gi
 ---
 #  MySQL Deployment
 apiVersion: apps/v1
